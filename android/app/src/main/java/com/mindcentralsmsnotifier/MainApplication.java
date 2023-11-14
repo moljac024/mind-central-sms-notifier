@@ -10,7 +10,7 @@ import com.facebook.react.defaults.DefaultReactNativeHost;
 import com.facebook.soloader.SoLoader;
 import java.util.List;
 
-import com.mindcentralsmsnotifier.SmsPackage;
+import com.mindcentralsmsnotifier.MindCentralPackage;
 
 public class MainApplication extends Application implements ReactApplication {
 
@@ -28,7 +28,7 @@ public class MainApplication extends Application implements ReactApplication {
       // example:
       // packages.add(new MyReactNativePackage());
 
-      packages.add(new SmsPackage());
+      packages.add(new MindCentralPackage());
 
       return packages;
     }

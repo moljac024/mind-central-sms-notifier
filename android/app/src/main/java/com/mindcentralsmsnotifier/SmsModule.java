@@ -17,8 +17,13 @@ public class SmsModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void sendSms(String phoneNumber, String message) {
-        SmsManager smsManager = SmsManager.getDefault();
-        smsManager.sendTextMessage(phoneNumber, null, message, null, null);
+    public void sendSms(String phoneNumber, String message, Promise promise) {
+        try {
+            SmsManager smsManager = SmsManager.getDefault();
+            smsManager.sendTextMessage(phoneNumber, null, message, null, null);
+            promise.resolve("SMS Sent Successfully");
+        } catch (Exception e) {
+            promise.reject("SMS Failed", e.getMessage());
+        }
     }
 }
