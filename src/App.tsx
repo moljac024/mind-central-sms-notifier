@@ -5,6 +5,8 @@
  * @format
  */
 
+const SMS_NUMBER = '+381640930989';
+
 import * as React from 'react';
 import type {PropsWithChildren} from 'react';
 import {
@@ -14,16 +16,20 @@ import {
   StyleSheet,
   Text,
   useColorScheme,
+  Button,
   View,
 } from 'react-native';
 
 import {
   Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
+  // DebugInstructions,
+  // Header,
+  // LearnMoreLinks,
+  // ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
+
+import {SmsModule} from './sms';
+import {PowerModule} from './power';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -57,10 +63,20 @@ function Section({children, title}: SectionProps): JSX.Element {
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
+  const [powerSavingEnabled, setPowerSavingEnabled] = React.useState(false);
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
+
+  async function checkBatteryOpt() {
+    const isEnabled = await PowerModule.isBatteryOptEnabled();
+    setPowerSavingEnabled(isEnabled);
+  }
+
+  React.useEffect(() => {
+    checkBatteryOpt();
+  }, []);
 
   return (
     <SafeAreaView style={backgroundStyle}>
@@ -71,7 +87,7 @@ function App(): JSX.Element {
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         style={backgroundStyle}>
-        <Header />
+        {/* <Header /> */}
         <View
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
@@ -79,17 +95,36 @@ function App(): JSX.Element {
           <Section title="Step One">
             Edit <Text style={styles.highlight}>App.tsx</Text> to change this
             screen and then come back to see your edits.
+            <Text>Jebo bi te Bebo!!!</Text>
           </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
+          <Section title="Power Saving">
+            <Text>
+              Power saving is {powerSavingEnabled ? 'enabled' : 'disabled'}
+            </Text>
+            <Button
+              title="Enable power saving"
+              onPress={async () => {
+                await PowerModule.openBatteryOptimizationSettings();
+                await checkBatteryOpt();
+              }}
+            />
           </Section>
-          <Section title="Debug">
-            <DebugInstructions />
+          <Section title="SMS">
+            <Button
+              title="Send SMS!"
+              onPress={async () => {
+                const result = await SmsModule.sendSms(
+                  SMS_NUMBER,
+                  'testing 123',
+                );
+                console.log('sms send result: ', result);
+              }}
+            />
           </Section>
-          <Section title="Learn More">
+          {/* <Section title="Learn More">
             Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
+          </Section> */}
+          {/* <LearnMoreLinks /> */}
         </View>
       </ScrollView>
     </SafeAreaView>

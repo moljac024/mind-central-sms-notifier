@@ -22,6 +22,7 @@ public class MindCentralPackage implements ReactPackage {
         List<NativeModule> modules = new ArrayList<>();
 
         modules.add(new SmsModule(reactContext));
+        modules.add(new PowerModule(reactContext));
 
         return modules;
     }
