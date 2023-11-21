@@ -33,12 +33,12 @@ public class PowerModule extends ReactContextBaseJavaModule {
         PowerManager pm = (PowerManager) reactContext.getSystemService(Context.POWER_SERVICE);
         if (!pm.isIgnoringBatteryOptimizations(packageName)) {
             // You can view these logs from the terminal by typing:
-            // adb logcat -s MindCentralSMSPowerModule
-            Log.d("MindCentralSMSPowerModule", "Battery optimizations are NOT ignored");
+            // adb logcat -s MindCentralSMS
+            Log.d("MindCentralSMS", "Battery optimizations are NOT ignored");
             return false;
         }
 
-        Log.d("MindCentralSMSPowerModule", "Battery optimizations are ignored");
+        Log.d("MindCentralSMS", "Battery optimizations are ignored");
         return true;
     }
 

@@ -21,7 +21,7 @@ import {
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 
 import {useStore} from './store';
-import {SMS_NUMBER, SMS_MESSAGE} from './constants';
+import {initBackgroundTask, sendPendingAppointmentReminders} from './tasks';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -65,12 +65,16 @@ function App(): JSX.Element {
   React.useEffect(() => {
     let interval = setInterval(() => {
       actions.checkForPermissions();
-    }, 2000);
+    }, 5000);
 
     return () => {
       clearInterval(interval);
     };
   }, [actions]);
+
+  React.useEffect(() => {
+    initBackgroundTask();
+  }, []);
 
   if (state.permissions == null) {
     return (
@@ -112,19 +116,25 @@ function App(): JSX.Element {
               SMS sending is {state.permissions.sms ? 'enabled' : 'disabled'}
             </Text>
             {!state.permissions.sms && (
-              <Button
-                title="Enable SMS sending"
-                onPress={async () => {
-                  actions.requestSmsPermissions();
-                }}
-              />
+              <>
+                <Button
+                  title="Enable SMS sending"
+                  onPress={async () => {
+                    actions.requestSmsPermissions();
+                  }}
+                />
+              </>
             )}
-            <Button
-              title="Send SMS!"
-              onPress={async () => {
-                await actions.sendSms(SMS_NUMBER, SMS_MESSAGE);
-              }}
-            />
+            {state.permissions.sms && (
+              <>
+                <Button
+                  title="Send SMS reminders"
+                  onPress={async () => {
+                    await sendPendingAppointmentReminders();
+                  }}
+                />
+              </>
+            )}
           </Section>
         </View>
       </ScrollView>
