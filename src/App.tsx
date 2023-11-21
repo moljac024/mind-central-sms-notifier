@@ -5,8 +5,6 @@
  * @format
  */
 
-const SMS_NUMBER = '+381640930989';
-
 import * as React from 'react';
 import type {PropsWithChildren} from 'react';
 import {
@@ -20,16 +18,10 @@ import {
   View,
 } from 'react-native';
 
-import {
-  Colors,
-  // DebugInstructions,
-  // Header,
-  // LearnMoreLinks,
-  // ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+import {Colors} from 'react-native/Libraries/NewAppScreen';
 
-import {SmsModule} from './sms';
-import {PowerModule} from './power';
+import {useStore} from './store';
+import {SMS_NUMBER, SMS_MESSAGE} from './constants';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -63,20 +55,30 @@ function Section({children, title}: SectionProps): JSX.Element {
 
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
-  const [powerSavingEnabled, setPowerSavingEnabled] = React.useState(false);
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
-  async function checkBatteryOpt() {
-    const isEnabled = await PowerModule.isBatteryOptEnabled();
-    setPowerSavingEnabled(isEnabled);
-  }
+  const {state, actions} = useStore();
 
   React.useEffect(() => {
-    checkBatteryOpt();
-  }, []);
+    let interval = setInterval(() => {
+      actions.checkForPermissions();
+    }, 2000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [actions]);
+
+  if (state.permissions == null) {
+    return (
+      <View>
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={backgroundStyle}>
@@ -87,44 +89,43 @@ function App(): JSX.Element {
       <ScrollView
         contentInsetAdjustmentBehavior="automatic"
         style={backgroundStyle}>
-        {/* <Header /> */}
         <View
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-            <Text>Jebo bi te Bebo!!!</Text>
-          </Section>
           <Section title="Power Saving">
             <Text>
-              Power saving is {powerSavingEnabled ? 'enabled' : 'disabled'}
+              Power saving is{' '}
+              {state.permissions.batteryOptimization ? 'enabled' : 'disabled'}
             </Text>
-            <Button
-              title="Enable power saving"
-              onPress={async () => {
-                await PowerModule.openBatteryOptimizationSettings();
-                await checkBatteryOpt();
-              }}
-            />
+            {!state.permissions.batteryOptimization && (
+              <Button
+                title="Enable power saving"
+                onPress={async () => {
+                  await actions.openBatteryOptimizationSettings();
+                }}
+              />
+            )}
           </Section>
           <Section title="SMS">
+            <Text>
+              SMS sending is {state.permissions.sms ? 'enabled' : 'disabled'}
+            </Text>
+            {!state.permissions.sms && (
+              <Button
+                title="Enable SMS sending"
+                onPress={async () => {
+                  actions.requestSmsPermissions();
+                }}
+              />
+            )}
             <Button
               title="Send SMS!"
               onPress={async () => {
-                const result = await SmsModule.sendSms(
-                  SMS_NUMBER,
-                  'testing 123',
-                );
-                console.log('sms send result: ', result);
+                await actions.sendSms(SMS_NUMBER, SMS_MESSAGE);
               }}
             />
           </Section>
-          {/* <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section> */}
-          {/* <LearnMoreLinks /> */}
         </View>
       </ScrollView>
     </SafeAreaView>

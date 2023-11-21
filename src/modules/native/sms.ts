@@ -27,16 +27,25 @@ async function requestSmsPermission() {
   }
 }
 
+async function checkForSmsPermission() {
+  const hasPermission = await PermissionsAndroid.check(
+    PermissionsAndroid.PERMISSIONS.SEND_SMS,
+  );
+
+  return hasPermission;
+}
+
 export const SmsModule = {
   sendSms: async (phone: string, message: string) => {
-    const permissionGranted = await requestSmsPermission();
+    const permissionGranted = await checkForSmsPermission();
 
     if (!permissionGranted) {
-      // TODO: Handle permission denied somehow
       return;
     }
 
     // TODO: Validate phone is numeric string
     return NativeModules.SmsModule.sendSms(phone, message);
   },
+  checkForSmsPermission,
+  requestSmsPermission,
 };
