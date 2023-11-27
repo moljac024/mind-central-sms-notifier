@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {SafeAreaView, ScrollView, View} from 'react-native';
 
-import {Appbar, Text} from 'react-native-paper';
+import {Appbar, Text, Portal, Snackbar} from 'react-native-paper';
 
 import {useStore} from './store';
 import {initBackgroundTask} from './tasks';
@@ -43,6 +43,17 @@ function App(): JSX.Element {
         <View>
           <Permissions />
           <Actions />
+
+          <Portal>
+            <Snackbar
+              visible={state.popup != null}
+              onDismiss={actions.clearPopup}
+              action={{
+                label: 'close',
+              }}>
+              Sent SMS messages succesfully.
+            </Snackbar>
+          </Portal>
         </View>
       </ScrollView>
     </SafeAreaView>
