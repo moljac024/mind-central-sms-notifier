@@ -4,7 +4,6 @@ import {StyleSheet, View} from 'react-native';
 import {Button} from 'react-native-paper';
 
 import {useStore} from './store';
-import {sendPendingAppointmentReminders} from './tasks';
 
 const styles = StyleSheet.create({
   actions: {
@@ -14,7 +13,7 @@ const styles = StyleSheet.create({
 });
 
 export function Actions() {
-  const {state} = useStore();
+  const {state, actions} = useStore();
 
   if (state.permissions == null) {
     return null;
@@ -28,6 +27,8 @@ export function Actions() {
     <View style={styles.actions}>
       <Button
         mode="contained"
+        loading={state.inProgress}
+        disabled={state.inProgress}
         onPress={async () => {
           const controller = new AbortController();
           const signal = controller.signal;
@@ -35,7 +36,7 @@ export function Actions() {
           setTimeout(() => controller.abort(), 30000);
 
           try {
-            await sendPendingAppointmentReminders({
+            await actions.sendPendingAppointmentReminders({
               signal,
             });
           } catch (e) {

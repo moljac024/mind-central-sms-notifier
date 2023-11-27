@@ -2,6 +2,7 @@ import {create} from 'zustand';
 import {produce} from 'immer';
 
 import {PowerModule, SmsModule} from './modules/native';
+import {sendPendingAppointmentReminders} from './tasks';
 
 interface Store {
   state: {
@@ -9,12 +10,16 @@ interface Store {
       sms: boolean;
       batteryOptimization: boolean;
     };
+    inProgress: boolean;
   };
   actions: {
     checkForPermissions: () => void;
     openBatteryOptimizationSettings: () => void;
     requestSmsPermissions: () => void;
     sendSms: (phoneNumber: string, message: string) => Promise<string>;
+    sendPendingAppointmentReminders: (props: {
+      signal?: AbortSignal;
+    }) => Promise<void>;
   };
 }
 
@@ -24,6 +29,7 @@ export const useStore = create<Store>((set, get) => {
   return {
     state: {
       permissions: null,
+      inProgress: false,
     },
     actions: {
       checkForPermissions: async () => {
@@ -49,6 +55,29 @@ export const useStore = create<Store>((set, get) => {
       },
       sendSms: async (phoneNumber, message) => {
         return SmsModule.sendSms(phoneNumber, message);
+      },
+      sendPendingAppointmentReminders: async (
+        props: {
+          signal?: AbortSignal;
+        } = {},
+      ) => {
+        set(state =>
+          produce(state, draft => {
+            draft.state.inProgress = true;
+          }),
+        );
+
+        try {
+          await sendPendingAppointmentReminders({signal: props.signal});
+        } catch (error) {
+          // TODO: Handle error
+        } finally {
+          set(state =>
+            produce(state, draft => {
+              draft.state.inProgress = false;
+            }),
+          );
+        }
       },
     },
   };
