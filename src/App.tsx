@@ -130,7 +130,19 @@ function App(): JSX.Element {
                 <Button
                   title="Send SMS reminders"
                   onPress={async () => {
-                    await sendPendingAppointmentReminders();
+                    const controller = new AbortController();
+                    const signal = controller.signal;
+
+                    setTimeout(() => controller.abort(), 30000);
+
+                    try {
+                      await sendPendingAppointmentReminders({
+                        signal,
+                      });
+                    } catch (e) {
+                      console.log(e);
+                      // TODO: Handle error
+                    }
                   }}
                 />
               </>
