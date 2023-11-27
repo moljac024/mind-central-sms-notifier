@@ -19,6 +19,7 @@ import {
 } from 'react-native';
 
 import {Colors} from 'react-native/Libraries/NewAppScreen';
+import {Appbar} from 'react-native-paper';
 
 import {useStore} from './store';
 import {initBackgroundTask, sendPendingAppointmentReminders} from './tasks';
@@ -86,6 +87,12 @@ function App(): JSX.Element {
 
   return (
     <SafeAreaView style={backgroundStyle}>
+      <Appbar.Header>
+        <Appbar.BackAction onPress={() => {}} />
+        <Appbar.Content title="Title" />
+        <Appbar.Action icon="calendar" onPress={() => {}} />
+        <Appbar.Action icon="magnify" onPress={() => {}} />
+      </Appbar.Header>
       <StatusBar
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor={backgroundStyle.backgroundColor}
