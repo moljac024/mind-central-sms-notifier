@@ -94,15 +94,13 @@ android {
             def myKeystorePassword = System.getenv("ANDROID_APP_SIGNING_KEYSTORE_PASSWORD")
             def myKeyAlias = System.getenv("ANDROID_APP_SIGNING_KEY_ALIAS")
 
-            // Fail the build if any of the required variables are not set
-            if (myKeystorePath == null || myKeystorePassword == null || myKeyAlias == null) {
-                throw new GradleException("Keystore path, password, and key alias must be set as environment variables")
+            // Only set the signing config if all env variables are available
+            if (myKeystorePath != null && myKeystorePassword != null && myKeyAlias != null) {
+                storeFile file(myKeystorePath)
+                keyAlias myKeyAlias
+                storePassword myKeystorePassword
+                keyPassword myKeystorePassword
             }
-
-            storeFile file(myKeystorePath)
-            keyAlias myKeyAlias
-            storePassword myKeystorePassword
-            keyPassword myKeystorePassword
         }
     }
     buildTypes {
@@ -113,10 +111,32 @@ android {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
             // signingConfig signingConfigs.debug
+
             signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
+    }
+}
+
+// Define a task to check for environment variables during the release build
+task checkReleaseSigning {
+    doFirst {
+        // Fetch keystore path, store password, and key password from environment variables
+        def myKeystorePath = System.getenv("ANDROID_APP_SIGNING_KEYSTORE_PATH")
+        def myKeystorePassword = System.getenv("ANDROID_APP_SIGNING_KEYSTORE_PASSWORD")
+        def myKeyAlias = System.getenv("ANDROID_APP_SIGNING_KEY_ALIAS")
+
+        if (!(myKeystorePath != null && myKeystorePassword != null && myKeyAlias != null)) {
+            throw new GradleException("Keystore path, password, and key alias must be set as environment variables for release builds")
+        }
+    }
+}
+
+// Ensure the check is executed before the release build
+tasks.whenTaskAdded { task ->
+    if (task.name.startsWith('assembleRelease') || task.name.startsWith('bundleRelease')) {
+        task.dependsOn(checkReleaseSigning)
     }
 }
 
