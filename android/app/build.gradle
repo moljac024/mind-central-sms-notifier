@@ -88,6 +88,22 @@ android {
             keyAlias 'androiddebugkey'
             keyPassword 'android'
         }
+        release {
+            // Fetch keystore path, store password, and key password from environment variables
+            def myKeystorePath = System.getenv("ANDROID_APP_SIGNING_KEYSTORE_PATH")
+            def myKeystorePassword = System.getenv("ANDROID_APP_SIGNING_KEYSTORE_PASSWORD")
+            def myKeyAlias = System.getenv("ANDROID_APP_SIGNING_KEY_ALIAS")
+
+            // Fail the build if any of the required variables are not set
+            if (myKeystorePath == null || myKeystorePassword == null || myKeyAlias == null) {
+                throw new GradleException("Keystore path, password, and key alias must be set as environment variables")
+            }
+
+            storeFile file(myKeystorePath)
+            keyAlias myKeyAlias
+            storePassword myKeystorePassword
+            keyPassword myKeystorePassword
+        }
     }
     buildTypes {
         debug {
@@ -96,7 +112,8 @@ android {
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig signingConfigs.debug
+            // signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }

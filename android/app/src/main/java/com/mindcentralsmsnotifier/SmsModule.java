@@ -29,14 +29,6 @@ public class SmsModule extends ReactContextBaseJavaModule {
             ArrayList<String> parts = smsManager.divideMessage(message);
             smsManager.sendMultipartTextMessage(phoneNumber, null, parts, null, null);
 
-            // if (message.length() > 160) {
-            // Log.d("MindCentralSMS", "Sending multipart message");
-
-            // } else {
-            // Log.d("MindCentralSMS", "Sending single part message");
-            // smsManager.sendTextMessage(phoneNumber, null, message, null, null);
-            // }
-
             promise.resolve("SMS Sent Successfully");
         } catch (Exception e) {
             promise.reject("SMS Failed", e.getMessage());
