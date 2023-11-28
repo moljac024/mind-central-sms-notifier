@@ -3,7 +3,8 @@ import {View} from 'react-native';
 import {Text, Button} from 'react-native-paper';
 
 import {Section} from './Section';
-import {useStore} from './store';
+
+import {useStore} from '../modules/store';
 
 export function Permissions() {
   const {state, actions} = useStore();

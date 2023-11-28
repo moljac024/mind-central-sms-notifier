@@ -1,12 +1,20 @@
 import * as React from 'react';
-import {SafeAreaView, ScrollView, View} from 'react-native';
+import {PaperProvider} from 'react-native-paper';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+// import {useNavigation} from '@react-navigation/native';
 
-import {Appbar, Text, Portal, Snackbar} from 'react-native-paper';
+import {useStore} from './modules/store';
+import {initBackgroundTask} from './modules/tasks';
 
-import {useStore} from './store';
-import {initBackgroundTask} from './tasks';
-import {Permissions} from './Permissions';
-import {Actions} from './Actions';
+import {HomeScreen} from './components/HomeScreen';
+import {DetailsScreen} from './components/DetailsScreen';
+import {LoadingScreen} from './components/Loader';
+
+import {CombinedDefaultTheme, CombinedDarkTheme} from './modules/themes';
+import {PreferencesContext} from './components/PreferencesContext';
+
+const Stack = createNativeStackNavigator();
 
 function App(): JSX.Element {
   const {state, actions} = useStore();
@@ -26,38 +34,41 @@ function App(): JSX.Element {
   }, []);
 
   if (state.permissions == null) {
-    return (
-      <View>
-        <Text>Loading...</Text>
-      </View>
-    );
+    return <LoadingScreen />;
   }
 
   return (
-    <SafeAreaView>
-      <Appbar.Header>
-        <Appbar.Content title="MindCentral SMS" />
-      </Appbar.Header>
-
-      <ScrollView contentInsetAdjustmentBehavior="automatic">
-        <View>
-          <Permissions />
-          <Actions />
-
-          <Portal>
-            <Snackbar
-              visible={state.popup != null}
-              onDismiss={actions.clearPopup}
-              action={{
-                label: 'close',
-              }}>
-              Sent SMS messages succesfully.
-            </Snackbar>
-          </Portal>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <Stack.Navigator initialRouteName="Home">
+      <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name="Details" component={DetailsScreen} />
+    </Stack.Navigator>
   );
 }
 
-export default App;
+export function Main() {
+  const [isThemeDark, setIsThemeDark] = React.useState(false);
+
+  let theme = isThemeDark ? CombinedDarkTheme : CombinedDefaultTheme;
+
+  const toggleTheme = React.useCallback(() => {
+    return setIsThemeDark(!isThemeDark);
+  }, [isThemeDark]);
+
+  const preferences = React.useMemo(
+    () => ({
+      toggleTheme,
+      isThemeDark,
+    }),
+    [toggleTheme, isThemeDark],
+  );
+
+  return (
+    <PreferencesContext.Provider value={preferences}>
+      <PaperProvider theme={theme}>
+        <NavigationContainer theme={theme}>
+          <App />
+        </NavigationContainer>
+      </PaperProvider>
+    </PreferencesContext.Provider>
+  );
+}

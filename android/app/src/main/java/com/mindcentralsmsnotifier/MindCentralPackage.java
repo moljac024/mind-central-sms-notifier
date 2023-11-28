@@ -23,6 +23,7 @@ public class MindCentralPackage implements ReactPackage {
 
         modules.add(new SmsModule(reactContext));
         modules.add(new PowerModule(reactContext));
+        modules.add(new VersionModule(reactContext));
 
         return modules;
     }

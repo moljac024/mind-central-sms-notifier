@@ -1,7 +1,9 @@
 import BackgroundFetch from 'react-native-background-fetch';
 import {z} from 'zod';
 
-export const schema = z.object({
+import {sleep} from './lib';
+
+const schema = z.object({
   data: z.array(
     z.object({
       phoneNumber: z.string(),
@@ -13,11 +15,7 @@ export const schema = z.object({
 
 // import {SmsModule} from './modules/native';
 
-export function generateReminderText(
-  number: string,
-  time: string,
-  therapist: string,
-) {
+export function generateReminderText(time: string, therapist: string) {
   return `Poštovani/poštovana,
 Potvrđujemo vaš sutrašnji termin u ${time}.
 Vaš lekar će biti ${therapist}.
@@ -53,7 +51,7 @@ export async function sendPendingAppointmentReminders(
   for (const entry of parsed.data) {
     const {phoneNumber, time, therapist} = entry;
 
-    const message = generateReminderText(phoneNumber, time, therapist);
+    const message = generateReminderText(time, therapist);
 
     console.log('sending SMS', {message, phoneNumber, chars: message.length});
     // const result = await SmsModule.sendSms(phoneNumber, message);
@@ -63,12 +61,6 @@ export async function sendPendingAppointmentReminders(
 
   console.log('finished sending reminders');
   signal.removeEventListener('abort', onAbort);
-}
-
-// Function that takes in a number and returns a promise that resolves after the
-// given ms
-export async function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export function initBackgroundTask() {

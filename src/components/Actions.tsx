@@ -3,7 +3,7 @@ import {StyleSheet, View} from 'react-native';
 
 import {Button} from 'react-native-paper';
 
-import {useStore} from './store';
+import {useStore} from '../modules/store';
 
 const styles = StyleSheet.create({
   actions: {
