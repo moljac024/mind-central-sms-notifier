@@ -1,6 +1,11 @@
 import * as React from 'react';
 
-export const PreferencesContext = React.createContext({
+export type PreferencesContextType = {
+  toggleTheme: () => void;
+  isThemeDark: boolean;
+};
+
+export const PreferencesContext = React.createContext<PreferencesContextType>({
   toggleTheme: () => {},
   isThemeDark: false,
 });

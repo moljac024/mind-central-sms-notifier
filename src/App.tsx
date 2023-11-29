@@ -30,10 +30,12 @@ function App(): JSX.Element {
   }, [actions]);
 
   React.useEffect(() => {
+    actions.checkVersion();
     initBackgroundTask();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (state.permissions == null) {
+  if (state.permissions == null || state.version == null) {
     return <LoadingScreen />;
   }
 
@@ -47,8 +49,7 @@ function App(): JSX.Element {
 
 export function Main() {
   const [isThemeDark, setIsThemeDark] = React.useState(false);
-
-  let theme = isThemeDark ? CombinedDarkTheme : CombinedDefaultTheme;
+  const theme = isThemeDark ? CombinedDarkTheme : CombinedDefaultTheme;
 
   const toggleTheme = React.useCallback(() => {
     return setIsThemeDark(!isThemeDark);

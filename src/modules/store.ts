@@ -1,7 +1,7 @@
 import {create} from 'zustand';
 import {produce} from 'immer';
 
-import {PowerModule, SmsModule} from './native';
+import {PowerModule, SmsModule, VersionModule, VersionInfo} from './native';
 import {sendPendingAppointmentReminders} from './tasks';
 
 interface Store {
@@ -10,13 +10,15 @@ interface Store {
       sms: boolean;
       batteryOptimization: boolean;
     };
+    version: null | VersionInfo;
     inProgress: boolean;
     popup?: string;
   };
   actions: {
-    checkForPermissions: () => void;
-    openBatteryOptimizationSettings: () => void;
-    requestSmsPermissions: () => void;
+    checkForPermissions: () => Promise<void>;
+    checkVersion: () => Promise<void>;
+    openBatteryOptimizationSettings: () => Promise<void>;
+    requestSmsPermissions: () => Promise<void>;
     sendSms: (phoneNumber: string, message: string) => Promise<string>;
     clearPopup: () => void;
     sendPendingAppointmentReminders: (props: {
@@ -31,9 +33,20 @@ export const useStore = create<Store>((set, get) => {
   return {
     state: {
       permissions: null,
+      version: null,
       inProgress: false,
+      popup: undefined,
     },
     actions: {
+      checkVersion: async () => {
+        const version = await VersionModule.getVersion();
+
+        set(state =>
+          produce(state, draft => {
+            draft.state.version = version;
+          }),
+        );
+      },
       checkForPermissions: async () => {
         const isSmsPermissionGranted = await SmsModule.checkForSmsPermission();
         const isBatteryOptEnabled = await PowerModule.isBatteryOptEnabled();

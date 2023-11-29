@@ -8,6 +8,8 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Promise;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.Arguments;
 
 public class VersionModule extends ReactContextBaseJavaModule {
 
@@ -22,7 +24,11 @@ public class VersionModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void getVersion(Promise promise) {
-        String versionName = BuildConfig.VERSION_NAME;
-        promise.resolve(versionName);
+        WritableMap result = Arguments.createMap();
+
+        result.putString("versionName", BuildConfig.VERSION_NAME);
+        result.putInt("versionCode", BuildConfig.VERSION_CODE);
+
+        promise.resolve(result);
     }
 }
