@@ -1,20 +1,46 @@
 import * as React from 'react';
 import {PaperProvider} from 'react-native-paper';
 import {NavigationContainer} from '@react-navigation/native';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {createMaterialBottomTabNavigator} from 'react-native-paper/react-navigation';
+// import {createNativeStackNavigator} from '@react-navigation/native-stack';
 // import {useNavigation} from '@react-navigation/native';
 
 import {useStore} from './modules/store';
 import {initBackgroundTask} from './modules/tasks';
 
 import {HomeScreen} from './components/HomeScreen';
-import {DetailsScreen} from './components/DetailsScreen';
+import {SettingsScreen} from './components/SettingsScreen';
 import {LoadingScreen} from './components/Loader';
 
 import {CombinedDefaultTheme, CombinedDarkTheme} from './modules/themes';
 import {PreferencesContext} from './components/PreferencesContext';
+import * as Icons from './components/Icons';
 
-const Stack = createNativeStackNavigator();
+// const Stack = createNativeStackNavigator();
+const Tab = createMaterialBottomTabNavigator();
+
+function MainTabs() {
+  return (
+    <Tab.Navigator initialRouteName="Home">
+      <Tab.Screen
+        name="Home"
+        component={HomeScreen}
+        options={{
+          tabBarLabel: 'Home',
+          tabBarIcon: Icons.Home,
+        }}
+      />
+      <Tab.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          tabBarLabel: 'Settings',
+          tabBarIcon: Icons.Settings,
+        }}
+      />
+    </Tab.Navigator>
+  );
+}
 
 function App(): JSX.Element {
   const {state, actions} = useStore();
@@ -39,12 +65,7 @@ function App(): JSX.Element {
     return <LoadingScreen />;
   }
 
-  return (
-    <Stack.Navigator initialRouteName="Home">
-      <Stack.Screen name="Home" component={HomeScreen} />
-      <Stack.Screen name="Details" component={DetailsScreen} />
-    </Stack.Navigator>
-  );
+  return <MainTabs />;
 }
 
 export function Main() {

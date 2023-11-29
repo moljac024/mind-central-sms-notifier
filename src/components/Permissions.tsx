@@ -10,11 +10,7 @@ export function Permissions() {
   const {state, actions} = useStore();
 
   if (state.permissions == null) {
-    return (
-      <View>
-        <Text>Loading...</Text>
-      </View>
-    );
+    return null;
   }
 
   if (state.permissions.sms && state.permissions.batteryOptimization) {

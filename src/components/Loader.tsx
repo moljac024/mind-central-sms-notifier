@@ -1,11 +1,12 @@
 import * as React from 'react';
-import {View} from 'react-native';
-import {Text} from 'react-native-paper';
+import {ActivityIndicator} from 'react-native-paper';
+
+import {Centered} from './Centered';
 
 export function LoadingScreen() {
   return (
-    <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-      <Text>Loading</Text>
-    </View>
+    <Centered>
+      <ActivityIndicator animating={true} size={64} />
+    </Centered>
   );
 }

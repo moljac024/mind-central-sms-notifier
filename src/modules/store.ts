@@ -4,7 +4,7 @@ import {produce} from 'immer';
 import {PowerModule, SmsModule, VersionModule, VersionInfo} from './native';
 import {sendPendingAppointmentReminders} from './tasks';
 
-interface Store {
+export interface Store {
   state: {
     permissions: null | {
       sms: boolean;
