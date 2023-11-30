@@ -3,13 +3,57 @@ import {StyleSheet, View} from 'react-native';
 import {Button} from 'react-native-paper';
 
 import {useStore} from '../modules/store';
+import {
+  getDatabaseVersion,
+  resetDatabaseForDevelopment,
+  runMigrations,
+} from '../db/index';
 
 const styles = StyleSheet.create({
   actions: {
-    marginTop: 16,
     paddingHorizontal: 24,
   },
+  button: {
+    marginBottom: 8,
+  },
 });
+
+export function DevActions() {
+  if (__DEV__ === false) {
+    return null;
+  }
+
+  return (
+    <>
+      <Button
+        style={styles.button}
+        mode="contained"
+        onPress={async () => {
+          getDatabaseVersion();
+        }}>
+        Get db version
+      </Button>
+
+      <Button
+        style={styles.button}
+        mode="contained"
+        onPress={async () => {
+          runMigrations();
+        }}>
+        Run migrations
+      </Button>
+
+      <Button
+        style={styles.button}
+        mode="contained"
+        onPress={async () => {
+          resetDatabaseForDevelopment();
+        }}>
+        Reset database
+      </Button>
+    </>
+  );
+}
 
 export function Actions() {
   const {state, actions} = useStore();
@@ -25,6 +69,7 @@ export function Actions() {
   return (
     <View style={styles.actions}>
       <Button
+        style={styles.button}
         mode="contained"
         loading={state.inProgress}
         disabled={state.inProgress}
@@ -45,6 +90,8 @@ export function Actions() {
         }}>
         Send SMS reminders
       </Button>
+
+      <DevActions />
     </View>
   );
 }

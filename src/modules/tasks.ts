@@ -1,7 +1,7 @@
 import BackgroundFetch from 'react-native-background-fetch';
 import {z} from 'zod';
 
-import {sleep} from './lib';
+import {sleep} from '../lib/time';
 
 const schema = z.object({
   data: z.array(
