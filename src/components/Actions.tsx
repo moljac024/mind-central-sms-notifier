@@ -7,7 +7,7 @@ import {
   getDatabaseVersion,
   resetDatabaseForDevelopment,
   runMigrations,
-} from '../db/index';
+} from '../modules/db/index';
 
 const styles = StyleSheet.create({
   actions: {

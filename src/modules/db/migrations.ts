@@ -1,6 +1,6 @@
 import type {QuickSQLiteConnection} from 'react-native-quick-sqlite';
 
-import {MigrationScript, applyMigrations} from '../lib/db';
+import {MigrationScript, applyMigrations} from '../../lib/db';
 
 export const migrations: MigrationScript[] = [
   {

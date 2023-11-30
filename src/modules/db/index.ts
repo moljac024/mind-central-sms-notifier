@@ -1,6 +1,6 @@
 import {open} from 'react-native-quick-sqlite';
 
-import * as DB from '../lib/db';
+import * as DB from '../../lib/db';
 import {migrate} from './migrations';
 
 const DB_NAME = 'test.db';
