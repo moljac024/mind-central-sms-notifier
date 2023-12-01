@@ -1,6 +1,8 @@
 import * as React from 'react';
 import {Appbar, useTheme} from 'react-native-paper';
 
+import {DevHelper} from './DevHelper';
+
 export function Header() {
   const theme = useTheme();
 
@@ -12,6 +14,8 @@ export function Header() {
         },
       }}>
       <Appbar.Content title="MindCentral SMS" />
+
+      <DevHelper />
     </Appbar.Header>
   );
 }

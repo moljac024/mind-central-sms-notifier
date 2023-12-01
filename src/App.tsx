@@ -58,28 +58,22 @@ function App(): JSX.Element {
   }, [actions]);
 
   React.useEffect(() => {
-    actions.init();
     AppointmentService.initRemindersBackgroundTask();
 
     return () => {
       // Close the database when app is closed
       DB.closeDatabase();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (
-    state.initialized === false ||
-    state.permissions == null ||
-    state.version == null
-  ) {
+  if (state.permissions == null || state.version == null) {
     return <LoadingScreen />;
   }
 
   return <MainTabs />;
 }
 
-export function Main() {
+function AppContainer() {
   const [isThemeDark, setIsThemeDark] = React.useState(
     PreferencesService.getPreferences().isDarkMode,
   );
@@ -110,4 +104,19 @@ export function Main() {
       </PaperProvider>
     </PreferencesContext.Provider>
   );
+}
+
+export function Main() {
+  const {state, actions} = useStore();
+
+  React.useEffect(() => {
+    actions.init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  if (state.initialized === false) {
+    return <LoadingScreen />;
+  }
+
+  return <AppContainer />;
 }
