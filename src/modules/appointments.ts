@@ -3,15 +3,25 @@ import {z} from 'zod';
 
 import {sleep} from '../lib/time';
 
-const schema = z.object({
-  data: z.array(
-    z.object({
-      phoneNumber: z.string(),
-      therapist: z.string(),
-      time: z.string(),
-    }),
-  ),
-});
+export async function fetchPendingAppointmentReminders() {
+  const schema = z.object({
+    data: z.array(
+      z.object({
+        phoneNumber: z.string(),
+        therapist: z.string(),
+        time: z.string(),
+      }),
+    ),
+  });
+
+  const response = await fetch(
+    'https://mind-central-appointments.fly.dev/api/appointments/reminders?delay=8000',
+  );
+  const json = await response.json();
+  const parsed = schema.parse(json);
+
+  return parsed.data;
+}
 
 // import {SmsModule} from './modules/native';
 
@@ -41,19 +51,14 @@ export async function sendPendingAppointmentReminders(
   }
   signal.addEventListener('abort', onAbort);
 
-  const response = await fetch(
-    'https://mind-central-appointments.fly.dev/api/appointments/reminders?delay=8000',
-    {signal},
-  );
-  const json = await response.json();
-  const parsed = schema.parse(json);
+  const pendingAppointments = await fetchPendingAppointmentReminders();
 
-  for (const entry of parsed.data) {
+  for (const entry of pendingAppointments) {
     const {phoneNumber, time, therapist} = entry;
 
     const message = generateReminderText(time, therapist);
 
-    console.log('sending SMS', {message, phoneNumber, chars: message.length});
+    console.log('Sending SMS', {message, phoneNumber, chars: message.length});
     // const result = await SmsModule.sendSms(phoneNumber, message);
     // console.log('SMS Sending result: ', result);
     await sleep(200);
@@ -63,23 +68,21 @@ export async function sendPendingAppointmentReminders(
   signal.removeEventListener('abort', onAbort);
 }
 
-export function initBackgroundTask() {
+export function initRemindersBackgroundTask() {
   const abortController = new AbortController();
 
   // BackgroundFetch event handler.
   async function onEvent(taskId: string) {
     console.log('[BackgroundFetch] task: ', taskId);
     // Do your background work...
-    // IMPORTANT:  You must signal to the OS that your task is complete.
-
-    // Send random amount of messages
     await sendPendingAppointmentReminders({signal: abortController.signal});
 
+    // IMPORTANT:  You must signal to the OS that your task is complete.
     BackgroundFetch.finish(taskId);
   }
 
-  // Timeout callback is executed when your Task has exceeded its allowed running-time.
-  // You must stop what you're doing immediately BackgroundFetch.finish(taskId)
+  // Timeout callback is executed when your Task has exceeded its allowed
+  // running-time. You must stop what you're doing immediately
   async function onTimeout(taskId: string) {
     console.warn('[BackgroundFetch] TIMEOUT task: ', taskId);
     abortController.abort();
@@ -99,7 +102,8 @@ export function initBackgroundTask() {
   });
 
   return {
-    stop: async () => {
+    stop: () => {
+      console.log('Stopping background task...');
       return BackgroundFetch.stop();
     },
   };

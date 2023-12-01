@@ -6,7 +6,7 @@ import {createMaterialBottomTabNavigator} from 'react-native-paper/react-navigat
 // import {useNavigation} from '@react-navigation/native';
 
 import {useStore} from './modules/store';
-import {initBackgroundTask} from './modules/tasks';
+import {initRemindersBackgroundTask} from './modules/appointments';
 
 import {HomeScreen} from './components/HomeScreen';
 import {SettingsScreen} from './components/SettingsScreen';
@@ -57,7 +57,7 @@ function App(): JSX.Element {
 
   React.useEffect(() => {
     actions.checkVersion();
-    initBackgroundTask();
+    initRemindersBackgroundTask();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

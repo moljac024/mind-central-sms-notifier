@@ -2,8 +2,15 @@ import type {
   QuickSQLiteConnection,
   Transaction,
 } from 'react-native-quick-sqlite';
+import {open} from 'react-native-quick-sqlite';
 
 const MIGRATIONS_TABLE_NAME = 'SchemaMigrationHistory';
+
+export type MigrationScript = {
+  name: string;
+  up: (db: Transaction) => Promise<void>;
+  postApply?: (db: Transaction) => Promise<void>;
+};
 
 async function ensureVersionTable(db: QuickSQLiteConnection) {
   const sql = `
@@ -17,9 +24,7 @@ async function ensureVersionTable(db: QuickSQLiteConnection) {
   return;
 }
 
-export async function getDatabaseVersion(
-  db: QuickSQLiteConnection,
-): Promise<number> {
+async function getDatabaseVersion(db: QuickSQLiteConnection): Promise<number> {
   try {
     const results = await db.executeAsync(
       `SELECT MAX(VersionID) as maxVersion FROM ${MIGRATIONS_TABLE_NAME}`,
@@ -37,11 +42,6 @@ export async function getDatabaseVersion(
     return 0;
   }
 }
-
-export type MigrationScript = {
-  name: string;
-  up: (db: Transaction) => Promise<void>;
-};
 
 async function getAllAppliedMigrations(
   tx: Transaction,
@@ -64,7 +64,7 @@ async function getAllAppliedMigrations(
   return migrations;
 }
 
-export async function applyMigrations(
+async function applyMigrations(
   db: QuickSQLiteConnection,
   migrations: MigrationScript[],
 ): Promise<void> {
@@ -99,6 +99,11 @@ export async function applyMigrations(
         // Apply the migration
         await migration.up(tx);
 
+        if (migration.postApply) {
+          console.log(`Running post-apply logic for ${migration.name}`);
+          await migration.postApply(tx);
+        }
+
         // Insert a new record into the migration history table
         await tx.executeAsync(
           `INSERT INTO ${MIGRATIONS_TABLE_NAME} (VersionID, Name) VALUES (?, ?)`,
@@ -115,7 +120,7 @@ export async function applyMigrations(
   });
 }
 
-export async function resetDatabaseForDevelopment(
+async function resetDatabaseForDevelopment(
   db: QuickSQLiteConnection,
 ): Promise<void> {
   if (__DEV__) {
@@ -141,9 +146,62 @@ export async function resetDatabaseForDevelopment(
     });
 
     console.log('Database reset complete.');
-  } else {
-    console.error(
-      'Attempted to reset database in non-development environment.',
-    );
   }
+}
+
+type MakeDBProps = {
+  db: Parameters<typeof open>[0];
+  migrations: MigrationScript[];
+};
+
+export function MakeDB(props: MakeDBProps) {
+  let dbInstance: QuickSQLiteConnection | null = null;
+
+  const getDatabase = () => {
+    if (dbInstance == null) {
+      dbInstance = open(props.db);
+    }
+    return dbInstance;
+  };
+
+  const closeDatabase = () => {
+    if (dbInstance) {
+      dbInstance.close();
+      dbInstance = null;
+    }
+  };
+
+  return {
+    getDatabase,
+    closeDatabase,
+    getDatabaseVersion: async () => {
+      const version = await getDatabaseVersion(getDatabase());
+      console.log('database version: ', version);
+      return version;
+    },
+    resetDatabaseForDevelopment: async (
+      options: {hardReset?: boolean} = {},
+    ) => {
+      if (!__DEV__) {
+        console.error(
+          'Attempted to reset database in non-development environment.',
+        );
+        return;
+      }
+
+      const {hardReset = false} = options;
+
+      if (hardReset) {
+        const db = getDatabase();
+        db.close();
+        db.delete();
+
+        // Make sure the DB is opened again
+        getDatabase();
+      } else {
+        return resetDatabaseForDevelopment(getDatabase());
+      }
+    },
+    initializeDatabase: () => applyMigrations(getDatabase(), props.migrations),
+  };
 }

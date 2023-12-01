@@ -2,7 +2,7 @@ import {create} from 'zustand';
 import {produce} from 'immer';
 
 import {PowerModule, SmsModule, VersionModule, VersionInfo} from './native';
-import {sendPendingAppointmentReminders} from './tasks';
+import {sendPendingAppointmentReminders} from './appointments';
 
 export interface Store {
   state: {

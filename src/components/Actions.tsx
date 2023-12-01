@@ -3,11 +3,7 @@ import {StyleSheet, View} from 'react-native';
 import {Button} from 'react-native-paper';
 
 import {useStore} from '../modules/store';
-import {
-  getDatabaseVersion,
-  resetDatabaseForDevelopment,
-  runMigrations,
-} from '../modules/db/index';
+import {DB} from '../modules/db';
 
 const styles = StyleSheet.create({
   actions: {
@@ -29,7 +25,7 @@ export function DevActions() {
         style={styles.button}
         mode="contained"
         onPress={async () => {
-          getDatabaseVersion();
+          DB.getDatabaseVersion();
         }}>
         Get db version
       </Button>
@@ -38,7 +34,7 @@ export function DevActions() {
         style={styles.button}
         mode="contained"
         onPress={async () => {
-          runMigrations();
+          DB.initializeDatabase();
         }}>
         Run migrations
       </Button>
@@ -47,7 +43,7 @@ export function DevActions() {
         style={styles.button}
         mode="contained"
         onPress={async () => {
-          resetDatabaseForDevelopment();
+          DB.resetDatabaseForDevelopment();
         }}>
         Reset database
       </Button>
