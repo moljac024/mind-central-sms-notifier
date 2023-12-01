@@ -16,7 +16,7 @@ import {PreferencesContext} from './components/PreferencesContext';
 import {DB} from './modules/db';
 import {useStore} from './modules/store';
 import {PreferencesService} from './modules/preferences';
-import {initRemindersBackgroundTask} from './modules/appointments';
+import {AppointmentService} from './modules/appointments';
 
 // const Stack = createNativeStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
@@ -59,7 +59,7 @@ function App(): JSX.Element {
 
   React.useEffect(() => {
     actions.init();
-    initRemindersBackgroundTask();
+    AppointmentService.initRemindersBackgroundTask();
 
     return () => {
       // Close the database when app is closed

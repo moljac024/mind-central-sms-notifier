@@ -4,7 +4,7 @@ import {produce} from 'immer';
 import {DB} from './db';
 
 import {PowerModule, SmsModule, VersionModule, VersionInfo} from './native';
-import {sendPendingAppointmentReminders} from './appointments';
+import {AppointmentService} from './appointments';
 
 export interface Store {
   state: {
@@ -119,7 +119,9 @@ export const useStore = create<Store>((set, get) => {
         );
 
         try {
-          await sendPendingAppointmentReminders({signal: props.signal});
+          await AppointmentService.sendPendingAppointmentReminders({
+            signal: props.signal,
+          });
 
           set(state =>
             produce(state, draft => {
