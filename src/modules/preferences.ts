@@ -1,29 +1,41 @@
-// import {DB} from './db';
+import {DB} from './db';
 
 type Preferences = {
   isDarkMode: boolean;
 };
 
 type IPreferencesService = {
-  getPreferences: () => Promise<Preferences>;
+  getPreferences: () => Preferences;
   setPreferences: (preferences: Preferences) => Promise<void>;
 };
 
 export const PreferencesService: IPreferencesService = {
-  getPreferences: async () => {
+  getPreferences: () => {
     const defaultPreferences: Preferences = {
       isDarkMode: false,
     };
 
-    // TODO: Fetch preferences from the DB
-    // const preferences = await DB.getDatabase().executeAsync(
-    //   'SELECT * FROM Preferences',
-    // );
+    const preferencesQueryResult = DB.getDatabase().execute(
+      'SELECT * FROM Preferences',
+    );
 
-    return defaultPreferences;
+    if (
+      preferencesQueryResult.rows == null ||
+      preferencesQueryResult.rows?.length < 1
+    ) {
+      return defaultPreferences;
+    }
+
+    const preferences = preferencesQueryResult.rows.item(0);
+    console.log('preferences read from database: ', preferences);
+
+    return {
+      isDarkMode: preferences.isDarkMode,
+    };
   },
   setPreferences: async (preferences: Preferences) => {
-    // TODO: Implement
-    console.log('setting prefs:', preferences);
+    await DB.getDatabase().executeAsync(
+      `UPDATE Preferences SET isDarkMode = ${preferences.isDarkMode ? 1 : 0}`,
+    );
   },
 };

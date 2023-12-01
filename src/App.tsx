@@ -5,17 +5,18 @@ import {createMaterialBottomTabNavigator} from 'react-native-paper/react-navigat
 // import {createNativeStackNavigator} from '@react-navigation/native-stack';
 // import {useNavigation} from '@react-navigation/native';
 
-import {useStore} from './modules/store';
-import {initRemindersBackgroundTask} from './modules/appointments';
-
+import * as Icons from './components/Icons';
 import {HomeScreen} from './components/HomeScreen';
 import {SettingsScreen} from './components/SettingsScreen';
 import {LoadingScreen} from './components/Loader';
 
 import {CombinedDefaultTheme, CombinedDarkTheme} from './modules/themes';
 import {PreferencesContext} from './components/PreferencesContext';
-import * as Icons from './components/Icons';
+
 import {DB} from './modules/db';
+import {useStore} from './modules/store';
+import {PreferencesService} from './modules/preferences';
+import {initRemindersBackgroundTask} from './modules/appointments';
 
 // const Stack = createNativeStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
@@ -67,7 +68,11 @@ function App(): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (state.permissions == null || state.version == null) {
+  if (
+    state.initialized === false ||
+    state.permissions == null ||
+    state.version == null
+  ) {
     return <LoadingScreen />;
   }
 
@@ -75,11 +80,17 @@ function App(): JSX.Element {
 }
 
 export function Main() {
-  const [isThemeDark, setIsThemeDark] = React.useState(false);
+  const [isThemeDark, setIsThemeDark] = React.useState(
+    PreferencesService.getPreferences().isDarkMode,
+  );
   const theme = isThemeDark ? CombinedDarkTheme : CombinedDefaultTheme;
 
   const toggleTheme = React.useCallback(() => {
-    return setIsThemeDark(!isThemeDark);
+    const newValue = !isThemeDark;
+    setIsThemeDark(newValue);
+    PreferencesService.setPreferences({
+      isDarkMode: newValue,
+    });
   }, [isThemeDark]);
 
   const preferences = React.useMemo(

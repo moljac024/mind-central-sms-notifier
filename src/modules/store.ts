@@ -46,7 +46,7 @@ export const useStore = create<Store>((set, get) => {
       init: async () => {
         const initialized = get().state.initialized;
         if (initialized) {
-          console.warn('Attempted to initialize app twice!');
+          console.log('Attempted to initialize app twice!');
           return;
         }
 
