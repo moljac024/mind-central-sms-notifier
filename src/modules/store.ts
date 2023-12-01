@@ -1,11 +1,14 @@
 import {create} from 'zustand';
 import {produce} from 'immer';
 
+import {DB} from './db';
+
 import {PowerModule, SmsModule, VersionModule, VersionInfo} from './native';
 import {sendPendingAppointmentReminders} from './appointments';
 
 export interface Store {
   state: {
+    initialized: boolean;
     permissions: null | {
       sms: boolean;
       batteryOptimization: boolean;
@@ -15,6 +18,7 @@ export interface Store {
     popup?: string;
   };
   actions: {
+    init: () => Promise<void>;
     checkForPermissions: () => Promise<void>;
     checkVersion: () => Promise<void>;
     openBatteryOptimizationSettings: () => Promise<void>;
@@ -32,12 +36,36 @@ export const useStore = create<Store>((set, get) => {
 
   return {
     state: {
+      initialized: false,
       permissions: null,
       version: null,
       inProgress: false,
       popup: undefined,
     },
     actions: {
+      init: async () => {
+        const initialized = get().state.initialized;
+        if (initialized) {
+          console.warn('Attempted to initialize app twice!');
+          return;
+        }
+
+        console.log('Initializing app...');
+
+        // Initialize the database
+        await DB.initializeDatabase();
+
+        // Run initial actions
+        await Actions().checkVersion();
+        await Actions().checkForPermissions();
+
+        set(state =>
+          produce(state, draft => {
+            draft.state.initialized = true;
+          }),
+        );
+        console.log('App initialized.');
+      },
       checkVersion: async () => {
         const version = await VersionModule.getVersion();
 

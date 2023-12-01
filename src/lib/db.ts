@@ -159,6 +159,7 @@ export function MakeDB(props: MakeDBProps) {
 
   const getDatabase = () => {
     if (dbInstance == null) {
+      console.log('Opening database: ', props.db);
       dbInstance = open(props.db);
     }
     return dbInstance;
@@ -166,6 +167,7 @@ export function MakeDB(props: MakeDBProps) {
 
   const closeDatabase = () => {
     if (dbInstance) {
+      console.log('Closing database: ', props.db);
       dbInstance.close();
       dbInstance = null;
     }

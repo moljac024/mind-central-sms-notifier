@@ -15,6 +15,7 @@ import {LoadingScreen} from './components/Loader';
 import {CombinedDefaultTheme, CombinedDarkTheme} from './modules/themes';
 import {PreferencesContext} from './components/PreferencesContext';
 import * as Icons from './components/Icons';
+import {DB} from './modules/db';
 
 // const Stack = createNativeStackNavigator();
 const Tab = createMaterialBottomTabNavigator();
@@ -56,8 +57,13 @@ function App(): JSX.Element {
   }, [actions]);
 
   React.useEffect(() => {
-    actions.checkVersion();
+    actions.init();
     initRemindersBackgroundTask();
+
+    return () => {
+      // Close the database when app is closed
+      DB.closeDatabase();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

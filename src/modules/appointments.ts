@@ -2,6 +2,7 @@ import BackgroundFetch from 'react-native-background-fetch';
 import {z} from 'zod';
 
 import {sleep} from '../lib/time';
+import {DB} from './db';
 
 export async function fetchPendingAppointmentReminders() {
   const schema = z.object({
@@ -77,6 +78,8 @@ export function initRemindersBackgroundTask() {
     // Do your background work...
     await sendPendingAppointmentReminders({signal: abortController.signal});
 
+    // Close the database when background task ends
+    DB.getDatabase().close();
     // IMPORTANT:  You must signal to the OS that your task is complete.
     BackgroundFetch.finish(taskId);
   }
@@ -86,6 +89,9 @@ export function initRemindersBackgroundTask() {
   async function onTimeout(taskId: string) {
     console.warn('[BackgroundFetch] TIMEOUT task: ', taskId);
     abortController.abort();
+
+    // Close the database when background task ends
+    DB.getDatabase().close();
     BackgroundFetch.finish(taskId);
   }
 
