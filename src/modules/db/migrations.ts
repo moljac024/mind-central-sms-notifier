@@ -31,6 +31,7 @@ export const migrations: MigrationScript[] = [
         CREATE TABLE IF NOT EXISTS SmsEvents (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           phoneNumber TEXT NOT NULL,
+          message TEXT NOT NULL,
           timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
           success BOOLEAN NOT NULL
         );
