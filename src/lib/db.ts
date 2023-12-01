@@ -9,7 +9,6 @@ const MIGRATIONS_TABLE_NAME = 'SchemaMigrationHistory';
 export type MigrationScript = {
   name: string;
   up: (db: Transaction) => Promise<void>;
-  postApply?: (db: Transaction) => Promise<void>;
 };
 
 async function ensureVersionTable(db: QuickSQLiteConnection) {
@@ -98,11 +97,6 @@ async function applyMigrations(
         console.log(`Applying migration ${migration.name}`);
         // Apply the migration
         await migration.up(tx);
-
-        if (migration.postApply) {
-          console.log(`Running post-apply logic for ${migration.name}`);
-          await migration.postApply(tx);
-        }
 
         // Insert a new record into the migration history table
         await tx.executeAsync(

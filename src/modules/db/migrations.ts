@@ -35,10 +35,7 @@ export const migrations: MigrationScript[] = [
           success BOOLEAN NOT NULL
         );
       `);
-    },
-    postApply: async tx => {
-      // TODO: Get the prefered theme from the OS
-      // Insert the initial preferences row
+
       console.log('Inserting initial preferences row');
       await tx.executeAsync(`
         INSERT INTO Preferences (isDarkMode) VALUES (0);
