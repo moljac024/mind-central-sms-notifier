@@ -75,7 +75,7 @@ function App(): JSX.Element {
 
 function AppContainer() {
   const [isThemeDark, setIsThemeDark] = React.useState(
-    PreferencesService.getPreferences().isDarkMode,
+    () => PreferencesService.getPreferences().isDarkMode,
   );
   const theme = isThemeDark ? CombinedDarkTheme : CombinedDefaultTheme;
 
@@ -110,7 +110,9 @@ export function Main() {
   const {state, actions} = useStore();
 
   React.useEffect(() => {
-    actions.init();
+    if (state.initialized === false) {
+      actions.init();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

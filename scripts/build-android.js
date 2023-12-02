@@ -1,9 +1,10 @@
 const {spawn} = require('child_process');
 const path = require('path');
 
-require('dotenv').config();
-
 const ANDROID_DIR = path.resolve(__dirname, '../android');
+const BUILD_ENV_FILE = path.resolve(__dirname, '../.env.build');
+
+require('dotenv').config({path: BUILD_ENV_FILE});
 
 async function main() {
   const gradlew = path.join(ANDROID_DIR, 'gradlew');

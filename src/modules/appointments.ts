@@ -3,14 +3,15 @@ import {z} from 'zod';
 
 import {sleep} from '../lib/time';
 import {DB} from './db';
+import {fetchJSON} from '../lib/http';
+import {getApplicationConfig} from '../lib/config';
 // import {SmsModule} from './modules/native';
 
 export type IAppointmentService = {
   fetchPendingAppointmentReminders: () => Promise<
     Array<{
       phoneNumber: string;
-      therapist: string;
-      time: string;
+      message: string;
     }>
   >;
   sendPendingAppointmentReminders: (props?: {
@@ -21,34 +22,25 @@ export type IAppointmentService = {
   };
 };
 
-export function MakeAppointmentService(): IAppointmentService {
+export function MakeAppointmentService(config: {
+  baseApiUrl: string;
+}): IAppointmentService {
   async function fetchPendingAppointmentReminders() {
     const schema = z.object({
       data: z.array(
         z.object({
           phoneNumber: z.string(),
-          therapist: z.string(),
-          time: z.string(),
+          message: z.string(),
         }),
       ),
     });
 
-    const response = await fetch(
-      'https://mind-central-appointments.fly.dev/api/appointments/reminders?delay=8000',
+    const response = await fetchJSON(
+      schema,
+      `${config.baseApiUrl}/api/appointments/reminders`,
     );
-    const json = await response.json();
-    const parsed = schema.parse(json);
 
-    return parsed.data;
-  }
-
-  function generateReminderText(time: string, therapist: string) {
-    return `Poštovani/poštovana,
-  Potvrđujemo vaš sutrašnji termin u ${time}.
-  Vaš lekar će biti ${therapist}.
-
-  Srdačan pozdrav,
-  Ordinacija Psihocentrala`;
+    return response.data;
   }
 
   async function sendPendingAppointmentReminders(
@@ -71,9 +63,7 @@ export function MakeAppointmentService(): IAppointmentService {
     const pendingAppointments = await fetchPendingAppointmentReminders();
 
     for (const entry of pendingAppointments) {
-      const {phoneNumber, time, therapist} = entry;
-
-      const message = generateReminderText(time, therapist);
+      const {phoneNumber, message} = entry;
 
       console.log('Sending SMS', {message, phoneNumber, chars: message.length});
       // const result = await SmsModule.sendSms(phoneNumber, message);
@@ -138,4 +128,6 @@ export function MakeAppointmentService(): IAppointmentService {
   };
 }
 
-export const AppointmentService = MakeAppointmentService();
+export const AppointmentService = MakeAppointmentService({
+  baseApiUrl: getApplicationConfig().API_URL,
+});
