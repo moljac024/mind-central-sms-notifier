@@ -5,7 +5,7 @@ import {sleep} from '../lib/time';
 import {DB} from './db';
 import {fetchJSON} from '../lib/http';
 import {getApplicationConfig} from '../lib/config';
-// import {SmsModule} from './modules/native';
+import {SmsModule} from '../modules/native';
 
 export type IAppointmentService = {
   fetchPendingAppointmentReminders: () => Promise<
@@ -66,8 +66,8 @@ export function MakeAppointmentService(config: {
       const {phoneNumber, message} = entry;
 
       console.log('Sending SMS', {message, phoneNumber, chars: message.length});
-      // const result = await SmsModule.sendSms(phoneNumber, message);
-      // console.log('SMS Sending result: ', result);
+      const result = await SmsModule.sendSms(phoneNumber, message);
+      console.log('SMS Sending result: ', result);
       await sleep(200);
     }
 
