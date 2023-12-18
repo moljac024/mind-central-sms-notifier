@@ -57,20 +57,25 @@ export function MakeAppointmentService(config: {
     } = {},
   ) {
     const signal = props.signal || new AbortController().signal;
+    let isAborted = signal.aborted;
 
-    if (signal.aborted) {
+    if (isAborted) {
       throw new Error('Aborted');
     }
 
     function onAbort() {
       console.log('aborted reminder sending!');
-      throw new Error('Aborted');
+      isAborted = true;
     }
     signal.addEventListener('abort', onAbort);
 
     const pendingAppointments = await fetchPendingAppointmentReminders();
 
     for (const entry of pendingAppointments) {
+      if (isAborted) {
+        throw new Error('Aborted');
+      }
+
       const {phoneNumber, message} = entry;
 
       console.log('Sending SMS', {message, phoneNumber, chars: message.length});
