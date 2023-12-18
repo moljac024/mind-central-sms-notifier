@@ -1,5 +1,6 @@
 import BackgroundFetch from 'react-native-background-fetch';
 import {z} from 'zod';
+import axios from 'axios';
 
 import {sleep} from '../lib/time';
 import {DB} from './db';
@@ -29,6 +30,7 @@ export function MakeAppointmentService(config: {
     const schema = z.object({
       data: z.array(
         z.object({
+          bookingId: z.number(),
           phoneNumber: z.string(),
           message: z.string(),
         }),
@@ -41,6 +43,12 @@ export function MakeAppointmentService(config: {
     );
 
     return response.data;
+  }
+
+  async function confirmAppointment(bookingId: number) {
+    await axios.post(`${config.baseApiUrl}/api/appointments/reminders`, {
+      bookingId,
+    });
   }
 
   async function sendPendingAppointmentReminders(
@@ -67,6 +75,7 @@ export function MakeAppointmentService(config: {
 
       console.log('Sending SMS', {message, phoneNumber, chars: message.length});
       const result = await SmsModule.sendSms(phoneNumber, message);
+      await confirmAppointment(entry.bookingId);
       console.log('SMS Sending result: ', result);
       await sleep(200);
     }
